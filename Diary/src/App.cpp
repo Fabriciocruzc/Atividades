@@ -36,7 +36,7 @@ void App::add()
     std::string message;
     std::cout << "Enter your message:" << std::endl;
     std::getline(std::cin, message);
-
+    std::cout << "Message adicionada" << std::endl;
     add(message);
 }
 
