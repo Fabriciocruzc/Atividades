@@ -15,5 +15,7 @@ struct App
     void add();
     void add(const std::string message);
     void list_messages();
+    void search();
+    void search(const std::string& verificar);
 };
 #endif

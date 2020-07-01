@@ -1,4 +1,5 @@
 #include "../include/App.h"
+#include "../include/Message.h"
 
 #include <iostream>
 #include <string>
@@ -24,6 +25,11 @@ int App::run(int argc, char* argv[])
     } else if (action == "list") {
         list_messages();
     } else if (action == "search") {
+        if (argc == 2) {
+            search();
+        }else {
+            search(argv[2]);
+        }
     } else {
         return show_usage();
     }
@@ -52,6 +58,26 @@ void App::list_messages()
         const Message& message = diary.messages[i];
         std::cout << "-" << message.content << std::endl;
     }
+}
+
+void App::search(){
+    std::string verificar;
+    std::cout << "Digite apalavra que voce quer pesquisa:" << std::endl;
+    std::getline(std::cin, verificar);
+
+    search(verificar);
+}
+
+void App::search(const std::string& verificar){
+    Message* m = diary.search(verificar);
+
+    if (m) {
+        std::cout << "Mensagem encontrada." << std::endl;
+        
+        return;
+    }
+
+    std:: cout << "Mensagem nao encontrada." << std::endl;
 }
 
 int App::show_usage()

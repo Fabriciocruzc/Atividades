@@ -11,5 +11,9 @@ struct Message
     std::string content;
     Date date;
     Time time;
+
+    Message();
+    Message(std::string content, Date date, Time time);
+    std::string to_string();
 };
 #endif

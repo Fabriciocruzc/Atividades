@@ -1,37 +1,74 @@
 #include <iostream>
 #include <fstream>
-#include <cstring>
+#include <algorithm>
 #include "../include/Diary.h"
-
-
-
-std::string get_right_of_delim(std::string const& str, std::string const& delim){
-
-  return str.substr(str.find(delim) + delim.size());
-}
-
+#include "../include/Util.h"
 
 Diary::Diary(const std::string& filename):filename(filename) , messages(nullptr), messages2(nullptr), messages_size(0), messages_capacity(10)
 {
     messages = new Message[messages_capacity];
 
+    std::ifstream leitura(filename);
+
+    if (not leitura or not leitura.is_open()) {
+
+        std::cerr << "O arquivo nao pode ser aberto" << std::endl;
+        return;
+    }
+
+    std::string linha;
+    std::string linha_date;
+
+    while (std::getline(leitura, linha)) {
+        if(linha.length() == 0) {
+            continue;
+        }
+
+        if (linha.rfind("#", 0) == 0){
+            linha_date == linha.substr(2);
+            continue;
+        } 
+
+        std::string linha_message("");
+        std::string linha_message_content("");
+
+        if (linha.rfind("-", 0) == 0) {
+            linha_message = linha.substr(2, 8);
+        }
+
+        linha_message_content = linha.substr(11);
+
+        Message m;
+        m.content = linha_message_content;
+        m.date.set_from_string(linha_date);
+        m.time.set_from_string(linha_message);
+
+        add(m);
+    }
+
 }
 
 Diary::~Diary() {
+    write();
     delete[] messages;
-    delete[] messages2;
+    
 }
 
 void Diary::add(const std::string& message)
 {
     // adicionar mensagem no array de mensagens
     if (messages_capacity == messages_size) {
-        messages2 = new Message[messages_capacity * 2];
+        messages2 = new Message[messages_size * 2];
        for (size_t i = 0; i < messages_capacity; i++) {
             messages2[i] = messages[i];
        }
-    messages2 = messages;
-    delete[] messages;
+        delete[] messages;
+        messages = messages2;
+
+       
+
+        
+    }
 
     Message m;
     m.content = message;
@@ -42,29 +79,26 @@ void Diary::add(const std::string& message)
     m.date.set_from_string(format_deta);
     m.time.set_from_string(format_time);
 
-    messages2[messages_size] = m;
+    messages[messages_size] = m;
     messages_size++;
-
-    
-        
-    }else {
-
-        Message m;
-        m.content = message;
-
-        std::string format_deta = get_current_date();
-        std::string format_time = get_current_time();
-
-        m.date.set_from_string(format_deta);
-        m.time.set_from_string(format_time);
-
-        messages[messages_size] = m;
-        messages_size++;
-    
-    }
    
 
     
+}
+
+void Diary::add(const Message& message){
+    if (messages_size = messages_capacity) {
+        messages2 = new Message[messages_size * 2];
+        for (size_t i = 0; i < messages_capacity; i++) {
+            messages2[i] = messages[i];
+        }
+
+        delete[] messages;
+        messages = messages2;
+    }
+
+    messages[messages_size] = message;
+    messages_size++;
 }
 
 
@@ -117,40 +151,21 @@ void Diary::write()
             arquivo << "- " << hora << " " << messages->content << std::endl;
             
         }
-
-
 }
 
-void Diary::write_add(const Message& message){
+Message* Diary::search(const std::string& verificar){
+    for (size_t i = 0; i < this->messages_size; ++i){
 
-    int j = 0;
+        std::string const& message_content = this->messages[i].content;
 
-    std::ifstream leitura(filename);
-
-        if (!leitura.is_open()) {
-
-            std::cerr << "O arquivo nao pode ser aberto" << std::endl;
-
+        if(message_content.find(verificar) != std::string::npos){
+            return this->messages + i;
         }
-
-        std::string texto;
-
-        while (!leitura.eof()) {
-
-            ++j;
-
-            std::getline(leitura, texto);
-            
-            if (texto.size() == 0) {
-                continue;
-            }
-
-            
-            message = get_right_of_delim(texto, "-");
        
-        }
-}
+    }
 
+    return nullptr;
+}
 
 
 

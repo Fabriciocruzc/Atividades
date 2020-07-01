@@ -11,15 +11,16 @@ struct Diary
     ~Diary();
 
     std::string filename;
-    std::string diary;
+    
     Message* messages;
     Message* messages2;
     size_t messages_size;
     size_t messages_capacity;
 
     void add(const std::string& message);
-    void write_add(const Message& message);
+    void add(const Message& message);
     void write();
     void add();
+    Message* search(const std::string& verificar);
 };
 #endif
