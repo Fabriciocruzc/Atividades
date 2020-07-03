@@ -4,13 +4,13 @@ PROGRAMA = diary
 
 all: $(PROGRAMA)
 
-$(PROGRAMA): App.o Date.o Diary.o Time.o Message.o Util.o main.o
-	$(GCC) $(GCC_FLAGS) -o $(PROGRAMA) App.o Date.o Diary.o Time.o Message.o Util.o main.o
+$(PROGRAMA): App.o Date.o Diary.o Time.o Util.o main.o
+	$(GCC) $(GCC_FLAGS) -o $(PROGRAMA) App.o Date.o Diary.o Time.o Util.o main.o
 
 main.o: src/main.cpp
 	$(GCC) $(GCC_FLAGS) -c src/main.cpp
 
-Diary.o: src/Diary.cpp
+Diary.o: src/Diary.cpp include/Diary.h
 	$(GCC) $(GCC_FLAGS) -c src/Diary.cpp
 
 Date.o: src/Date.cpp
@@ -18,9 +18,6 @@ Date.o: src/Date.cpp
 
 Time.o: src/Time.cpp
 	$(GCC) $(GCC_FLAGS) -c src/Time.cpp
-
-Message.o: src/Date.cpp
-	$(GCC) $(GCC_FLAGS) -c src/Message.cpp
 
 Util.o: src/Util.cpp
 	$(GCC) $(GCC_FLAGS) -c src/Util.cpp

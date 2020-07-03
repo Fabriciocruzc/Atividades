@@ -1,170 +1,166 @@
 #include <iostream>
-#include <fstream>
-#include <algorithm>
+#include <sstream>
+#include <string>
+
 #include "../include/Diary.h"
 #include "../include/Util.h"
 
-Diary::Diary(const std::string& filename):filename(filename) , messages(nullptr), messages2(nullptr), messages_size(0), messages_capacity(10)
+
+Diary::Diary(const std::string &filename) : filename(filename)//, messages(nullptr), messages_size(0), messages_capacity(10)
 {
-    messages = new Message[messages_capacity];
+  //messages = new Message[messages_capacity];
 
-    std::ifstream leitura(filename);
+  std::ifstream reading;
 
-    if (not leitura or not leitura.is_open()) {
+  reading.open(filename);
 
-        std::cerr << "O arquivo nao pode ser aberto" << std::endl;
-        return;
+  if (!reading.is_open())
+  {
+    std::cout << "Arquivo nao pode ser aberto" << std::endl;
+  }
+
+  std::string reading_line;
+  int line_cont = 0;
+  std::string current_date = "";
+
+
+  while (!reading.eof()){
+
+    line_cont++;
+
+    std::getline(reading, reading_line);
+
+    if (reading_line.size() == 0){
+      continue;
     }
 
-    std::string linha;
-    std::string linha_date;
+    if ((reading_line.find("#") != std::string::npos)){
 
-    while (std::getline(leitura, linha)) {
-        if(linha.length() == 0) {
-            continue;
-        }
+      std::stringstream stream(reading_line);
+      char discard;
 
-        if (linha.rfind("#", 0) == 0){
-            linha_date == linha.substr(2);
-            continue;
-        } 
+      stream >> discard;
+      stream >> current_date;
 
-        std::string linha_message("");
-        std::string linha_message_content("");
+    }else{
 
-        if (linha.rfind("-", 0) == 0) {
-            linha_message = linha.substr(2, 8);
-        }
+      Message m;
+      m.date.set_from_string(current_date);
 
-        linha_message_content = linha.substr(11);
+      std::stringstream stream(reading_line);
+      char discard;
+      std::string current_time;
 
-        Message m;
-        m.content = linha_message_content;
-        m.date.set_from_string(linha_date);
-        m.time.set_from_string(linha_message);
+      stream >> discard;
+      stream >> current_time;
 
-        add(m);
+      m.time.set_from_string(current_time);
+      getline(stream, m.content);
+
+      m.content = m.content.substr(1);
+      add(m);
     }
+  }
 
+  reading.close();
+  
 }
 
-Diary::~Diary() {
-    write();
+Diary::~Diary()
+{
+  //delete[] messages;
+}
+
+void Diary::add(const std::string &message)
+{
+  /*if (messages_size >= messages_capacity)
+  {
+    messages_capacity *= 2;
+    Message *messages2 = new Message[messages_capacity];
+
+    for (size_t i = 0; i < messages_size; i++)
+    {
+      messages2[i] = messages[i];
+    }
+
     delete[] messages;
-    
+    messages = messages2;
+  }*/
+
+  Message m;
+  std::string current_date = get_current_date();
+  std::string current_time = get_current_time();
+
+  m.content = message;
+  m.date.set_from_string(current_date);
+  m.time.set_from_string(current_time);
+
+  messages.push_back(m);
+  //messages_size++;
 }
 
-void Diary::add(const std::string& message)
-{
-    // adicionar mensagem no array de mensagens
-    if (messages_capacity == messages_size) {
-        messages2 = new Message[messages_size * 2];
-       for (size_t i = 0; i < messages_capacity; i++) {
-            messages2[i] = messages[i];
-       }
-        delete[] messages;
-        messages = messages2;
-
-       
-
-        
-    }
-
-    Message m;
-    m.content = message;
-
-    std::string format_deta = get_current_date();
-    std::string format_time = get_current_time();
-
-    m.date.set_from_string(format_deta);
-    m.time.set_from_string(format_time);
-
-    messages[messages_size] = m;
-    messages_size++;
-   
-
-    
-}
-
-void Diary::add(const Message& message){
-    if (messages_size = messages_capacity) {
-        messages2 = new Message[messages_size * 2];
-        for (size_t i = 0; i < messages_capacity; i++) {
-            messages2[i] = messages[i];
-        }
-
-        delete[] messages;
-        messages = messages2;
-    }
-
-    messages[messages_size] = message;
-    messages_size++;
-}
+void Diary::write(){
+  
+  std::ofstream arquivo;
+  arquivo.open(filename, std::ofstream::out | std::ofstream::trunc);
+  arquivo.close();
+  std::string current_date = "";
 
 
-void Diary::write()
-{
-   
-   std::ofstream arquivo(filename, std::ios::app); 
-
-   if (!arquivo.is_open()) {
-
-        std::cerr << "O arquivo nao pode ser criado." << std::endl;
-        
-    }
-
-    Message m;
-    
-
-    std::ifstream leitura(filename);
-
-        if (!leitura.is_open()) {
-
-         std::cerr << "O arquivo nao pode ser aberto" << std::endl;
-
-    }
-
-    m.date.set_from_string(get_current_date());
-    m.time.set_from_string(get_current_time());
-
-    std::string verificar;
-
-    std::string dia = "# " + m.date.to_string();
+  for (size_t i = 0; i < messages.size(); i++)
+  {
+    Message m = messages[i];
+    std::string dia = m.date.to_string();
     std::string hora = m.time.to_string();
 
-  
-    bool existe = false;
-
-        while (!leitura.eof()) {
-            std::getline(leitura, verificar);
-
-            if (dia == verificar){
-                existe = true;
-            }
-
-        }
-
-        if (existe == true) {
-            arquivo << "- " << hora << " " << messages->content << std::endl;
-        }else{
-            arquivo << dia << std::endl;
-            arquivo << "- " << hora << " " << messages->content << std::endl;
-            
-        }
-}
-
-Message* Diary::search(const std::string& verificar){
-    for (size_t i = 0; i < this->messages_size; ++i){
-
-        std::string const& message_content = this->messages[i].content;
-
-        if(message_content.find(verificar) != std::string::npos){
-            return this->messages + i;
-        }
-       
+    if (m.date.to_string() != current_date)
+    {
+      std::ofstream file(filename, std::ios::app);
+      file << "# " << dia << std::endl;
     }
 
-    return nullptr;
+    std::ofstream file(filename, std::ios::app);
+    file << "- " << hora << " " << m.content << std::endl;
+
+    current_date = dia;
+  }
+}
+
+
+void Diary::add(const Message& message)
+{
+  /*if (messages_size >= messages_capacity)
+  {
+    messages_capacity *= 2;
+    Message *messages2 = new Message[messages_capacity];
+
+    for (size_t i = 0; i < messages_size; i++)
+    {
+      messages2[i] = messages[i];
+    }
+
+    delete[] messages;
+    messages = messages2;
+  }*/
+
+  messages.push_back(message);
+  //messages_size++;
+}
+
+
+std::vector<Message*> Diary::search(const std::string& check){
+
+    std::vector<Message*> found;
+    
+    for (auto i = 0; i < messages.size(); ++i)
+    {
+        //std::size_t search = messages[i].content.find(check);
+        if (messages[i].content.find(check) != std::string::npos) {
+            found.push_back(&messages[i]);
+        }
+    }
+
+    return found;
 }
 
 

@@ -1,29 +1,30 @@
-#include "../include/Time.h"
-#include <string>
-#include <sstream>
+#include "Time.h"
+
 #include <iostream>
+#include <sstream>
+#include <string>
 
-Time::Time(): hour(0), minute(0), second(0){
-
+Time::Time() : hour(0), minute(0), second(0)
+{
 }
 
 void Time::set_from_string(const std::string& time)
 {
-	std::stringstream stream(time);
-	char discard;
+  std::stringstream stream(time);
+  char discard;
 
-	stream >> hour;
-    stream >> discard; 
-    stream >> minute;
-    stream >> discard;
-    stream >> second;
+  stream >> hour;
+  stream >> discard;
+  stream >> minute;
+  stream >> discard;
+  stream >> second;
 }
 
 std::string Time::to_string(){
-	std::stringstream stream;
+  std::stringstream stream;
 
     if (hour < 10) {
-        stream << "0";
+        stream << 0;
     }
     stream << hour;
     stream << ':';
@@ -32,11 +33,11 @@ std::string Time::to_string(){
         stream << "0";
     }
     stream << minute << ":";
-   
-   	if (second < 10) {
-   		stream << "0";
-   	}
-   	stream << second;
+    
+    if (second < 10) {
+        stream << "0";
+    }
+    stream << second;
 
     return stream.str();
 }
